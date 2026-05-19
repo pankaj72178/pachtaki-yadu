@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pachtaki Yadu - Digital Village Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --gp-accent: #a855f7; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-4px); border-color: #a855f7 !important; }
+        #loadingSpinner { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-300">
+
+<!-- NAVIGATION -->
+<nav class="fixed top-0 w-full z-50 glass border-b border-white/5">
+    <div class="container mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-landmark text-purple-500 text-2xl"></i>
+            <span class="font-bold text-white text-sm md:text-lg">PACHTAKI YADU</span>
+        </div>
+        <div class="hidden md:flex space-x-6 text-xs font-bold">
+            <a href="#notices" class="hover:text-purple-500 transition">NOTICES</a>
+            <a href="#services" class="hover:text-purple-500 transition">SERVICES</a>
+            <a href="#events" class="hover:text-purple-500 transition">EVENTS</a>
+            <a href="#agriculture" class="hover:text-purple-500 transition">AGRICULTURE</a>
+            <a href="#jobs" class="hover:text-purple-500 transition">JOBS</a>
+            <a href="#complaints" class="hover:text-purple-500 transition">COMPLAINTS</a>
+            <a href="#about-village" class="hover:text-purple-500 transition">ABOUT VILLAGE</a>
+            <a href="#about-me" class="hover:text-purple-500 transition">ABOUT ME</a>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="pt-32 pb-16 px-4 md:px-6">
+    <div class="container mx-auto text-center">
+        <h1 class="text-5xl md:text-6xl font-black text-white mb-4">Pachtaki Yadu</h1>
+        <p class="text-xl md:text-2xl text-slate-400 mb-8">Digital Village Governance Portal</p>
+        <div class="flex flex-col md:flex-row gap-4 justify-center">
+            <a href="#complaints" onclick="scrollToSection('complaints')" class="px-8 py-3 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition">
+                REGISTER COMPLAINT
+            </a>
+            <a href="#notices" onclick="scrollToSection('notices')" class="px-8 py-3 glass text-white font-bold rounded-lg hover:bg-slate-700/50 transition border border-white/10">
+                VIEW NOTICES
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- NOTICES -->
+<section id="notices" class="py-16 px-4 md:px-6 bg-slate-800/30">
+    <div class="container mx-auto">
+        <h2 class="text-3xl md:text-4xl font-black text-white mb-8">📢 Public Notices</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="noticesContainer">
+            <div class="glass rounded-xl p-6 border border-white/10 text-center text-slate-400"><i id="loadingSpinner" class="fa-solid fa-spinner text-2xl"></i></div>
+        </div>
+    </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services" class="py-16 px-4 md:px-6">
+    <div class="container mx-auto">
+        <h2 class="text-3xl md:text-4xl font-black text-white mb-8">🏛️ Government Services</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="servicesContainer">
+            <div class="glass rounded-xl p-6 border border-white/10 text-center text-slate-400">Loading...</div>
+        </div>
+    </div>
+</section>
+
+<!-- EVENTS -->
+<section id="events" class="py-16 px-4 md:px-6 bg-slate-800/30">
+    <div class="container mx-auto">
+        <h2 class="text-3xl md:text-4xl font-black text-white mb-8">📅 Village Events</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="eventsContainer">
+            <div class="glass rounded-xl p-6 border border-white/10 text-center text-slate-400">Loading...</div>
+        </div>
+    </div>
+</section>
+
+<!-- AGRICULTURE -->
+<section id="agriculture" class="py-16 px-4 md:px-6">
+    <div class="container mx-auto">
+        <h2 class="text-3xl md:text-4xl font-black text-white mb-8">🌾 Agriculture Support</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="agricultureContainer">
+            <div class="glass rounded-xl p-6 border border-white/10 text-center text-slate-400">Loading...</div>
+        </div>
+    </div>
+</section>
+
+<!-- JOBS -->
+<section id="jobs" class="py-16 px-4 md:px-6 bg-slate-800/30">
+    <div class="container mx-auto">
+        <h2 class="text-3xl md:text-4xl font-black text-white mb-8">💼 Job Opportunities</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="jobsContainer">
+            <div class="glass rounded-xl p-6 border border-white/10 text-center text-slate-400">Loading...</div>
+        </div>
+    </div>
+</section>
+
+<!-- BUDGET -->
+<section id="budget" class="py-16 px-4 md:px-6">
+    <div class="container mx-auto">
+        <h2 class="text-3xl md:text-4xl font-black text-white mb-8">💰 Budget & Expenditure</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="glass rounded-xl p-6 border border-white/10 text-center">
+                <p class="text-slate-400 text-sm mb-2">Total Budget</p>
+                <p class="text-2xl font-bold text-purple-400" id="budgetTotal">-</p>
+            </div>
+            <div class="glass rounded-xl p-6 border border-white/10 text-center">
+                <p class="text-slate-400 text-sm mb-2">Spent</p>
+                <p class="text-2xl font-bold text-red-400" id="budgetSpent">-</p>
+            </div>
+            <div class="glass rounded-xl p-6 border border-white/10 text-center">
+                <p class="text-slate-400 text-sm mb-2">Utilization</p>
+                <p class="text-2xl font-bold text-yellow-400" id="budgetRate">0%</p>
+            </div>
+            <div class="glass rounded-xl p-6 border border-white/10 text-center">
+                <p class="text-slate-400 text-sm mb-2">Projects</p>
+                <p class="text-2xl font-bold text-green-400" id="budgetProjects">0</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="budgetContainer"></div>
+    </div>
+</section>
+
+<!-- SUGGESTIONS -->
+<section id="suggestions" class="py-16 px-4 md:px-6 bg-slate-800/30">
+    <div class="container mx-auto">
+        <h2 class="text-3xl md:text-4xl font-black text-white mb-8">💡 Suggestions & Ideas</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2">
+                <form onsubmit="submitSuggestion(event)" class="glass rounded-xl p-6 border border-white/10 space-y-4">
+                    <input type="text" id="suggestionTitle" placeholder="Idea Title" class="w-full bg-slate-950 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500" required>
+                    <textarea id="suggestionDesc" placeholder="Describe your idea..." rows="4" class="w-full bg-slate-950 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500" required></textarea>
+                    <button type="submit" class="w-full bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition">SUBMIT IDEA</button>
+                </form>
+            </div>
+            <div class="glass rounded-xl p-6 border border-white/10">
+                <h3 class="text-lg font-bold text-white mb-4">Top Ideas</h3>
+                <div id="suggestionsContainer" class="space-y-3 text-sm"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- COMPLAINTS -->
+<section id="complaints" class="py-16 px-4 md:px-6">
+    <div class="container mx-auto">
+        <h2 class="text-3xl md:text-4xl font-black text-white mb-8">📝 Register Complaint</h2>
+        
+        <div class="max-w-2xl mx-auto glass rounded-xl p-6 md:p-8 border border-white/10 mb-12">
+            <form id="complaintForm" onsubmit="submitComplaint(event)" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="fullName" placeholder="Full Name" class="bg-slate-950 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500" required>
+                    <select id="wardNumber" class="bg-slate-950 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500" required>
+                        <option value="">Select Ward</option>
+                        <option value="Ward 1">Ward 1</option>
+                        <option value="Ward 2">Ward 2</option>
+                        <option value="Ward 3">Ward 3</option>
+                        <option value="Ward 4">Ward 4</option>
+                        <option value="Ward 5">Ward 5</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <select id="category" class="bg-slate-950 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500" required>
+                        <option value="">Select Category</option>
+                        <option value="Road & Infrastructure">🛣️ Road & Infrastructure</option>
+                        <option value="Water Supply">💧 Water Supply</option>
+                        <option value="Electricity">⚡ Electricity</option>
+                        <option value="Sanitation">🧹 Sanitation</option>
+                        <option value="Other">📝 Other</option>
+                    </select>
+                    <select id="severity" class="bg-slate-950 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500">
+                        <option value="Low">🟢 Low Priority</option>
+                        <option value="Medium" selected>🟡 Medium Priority</option>
+                        <option value="High">🔴 High Priority</option>
+                    </select>
+                </div>
+                <textarea id="issue" placeholder="Describe the issue..." rows="4" class="w-full bg-slate-950 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500" required></textarea>
+                <button type="submit" id="submitBtn" class="w-full bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition">SUBMIT COMPLAINT</button>
+                <div id="responseMessage" class="hidden text-center font-bold p-3 rounded-lg"></div>
+            </form>
+        </div>
+
+        <h3 class="text-2xl font-bold text-white mb-6">Recent Complaints</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="complaintsContainer">
+            <div class="glass rounded-xl p-6 border border-white/10 text-center text-slate-400">Loading...</div>
+        </div>
+    </div>
+</section>
+
+<!-- ABOUT VILLAGE -->
+<section id="about-village" class="py-20 px-4 md:px-6 bg-slate-800/50">
+    <div class="container mx-auto">
+        <h2 class="text-4xl font-black text-white mb-8 text-center">About Our Village</h2>
+        <div class="max-w-3xl mx-auto">
+            <div class="glass rounded-2xl p-8 border border-white/10">
+                <p class="text-slate-300 mb-4 leading-relaxed text-lg">
+                    <strong>Bairgania (Pachtaki Yadu)</strong> is a vibrant rural village in Bihar, dedicated to sustainable development and community welfare. Our village represents the true spirit of Indian democracy and grassroots governance.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+                    <div class="bg-slate-900/50 p-4 rounded-lg border border-white/5">
+                        <h3 class="text-purple-400 font-bold mb-3">📊 Village Statistics</h3>
+                        <ul class="text-sm text-slate-400 space-y-2">
+                            <li>👥 Population: ~5,000+</li>
+                            <li>🏘️ Total Wards: 5</li>
+                            <li>🌾 Primary Occupation: Agriculture</li>
+                            <li>📍 District: North Bihar</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-900/50 p-4 rounded-lg border border-white/5">
+                        <h3 class="text-purple-400 font-bold mb-3">🎯 Our Vision</h3>
+                        <ul class="text-sm text-slate-400 space-y-2">
+                            <li>✓ Digital Governance</li>
+                            <li>✓ Sustainable Development</li>
+                            <li>✓ Community Empowerment</li>
+                            <li>✓ Transparency & Accountability</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="text-slate-400 text-center italic">
+                    "Building a digital-first, citizen-centric village where every voice is heard and every issue is addressed."
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ABOUT ME / CREATOR -->
+<section id="about-me" class="py-20 px-4 md:px-6">
+    <div class="container mx-auto">
+        <h2 class="text-4xl font-black text-white mb-8 text-center">About The Developer</h2>
+        <div class="max-w-2xl mx-auto">
+            <div class="glass rounded-2xl p-8 border border-white/10 text-center">
+                <div class="mb-6">
+                    <img src="image_1.jpg" alt="Pankaj Kumar" class="w-32 h-32 mx-auto rounded-full object-cover border-4 border-purple-500 shadow-lg">
+                </div>
+                <h3 class="text-3xl font-bold text-white mb-2">Pankaj Kumar</h3>
+                <p class="text-purple-400 font-bold mb-4">Full Stack Developer | Digital Innovator</p>
+                <p class="text-slate-400 mb-6 leading-relaxed">
+                    Creator of Pachtaki Yadu Digital Village Portal - a comprehensive digital governance solution built to empower rural communities through technology. Passionate about bridging the digital divide and bringing transparent, efficient governance to grassroots level.
+                </p>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 my-6">
+                    <div class="bg-slate-900/50 p-3 rounded-lg">
+                        <p class="text-xs text-slate-500 mb-1">EXPERTISE</p>
+                        <p class="text-white font-bold text-sm">Full Stack Dev</p>
+                    </div>
+                    <div class="bg-slate-900/50 p-3 rounded-lg">
+                        <p class="text-xs text-slate-500 mb-1">FOCUS</p>
+                        <p class="text-white font-bold text-sm">Web Apps</p>
+                    </div>
+                    <div class="bg-slate-900/50 p-3 rounded-lg">
+                        <p class="text-xs text-slate-500 mb-1">MISSION</p>
+                        <p class="text-white font-bold text-sm">Rural Tech</p>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500 italic">
+                    "Technology should serve everyone, especially those who need it most."
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="py-12 px-4 md:px-6 border-t border-white/10 bg-slate-950/50">
+    <div class="container mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div>
+                <h4 class="text-white font-bold mb-4">About</h4>
+                <p class="text-slate-400 text-sm">Digital governance portal for Pachtaki Yadu village</p>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4">Quick Links</h4>
+                <ul class="text-slate-400 text-sm space-y-2">
+                    <li><a href="#about-village" class="hover:text-purple-400">About Village</a></li>
+                    <li><a href="#about-me" class="hover:text-purple-400">About Developer</a></li>
+                    <li><a href="#complaints" class="hover:text-purple-400">Report Issue</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4">Contact</h4>
+                <p class="text-slate-400 text-sm">📧 panchayat@pachtakiyadu.local</p>
+                <p class="text-slate-400 text-sm">📞 Gram Panchayat Office</p>
+            </div>
+        </div>
+        <div class="border-t border-white/10 pt-6 text-center text-slate-500 text-sm">
+            <p>&copy; 2026 Pachtaki Yadu Gram Panchayat | Digital Village Portal</p>
+            <p class="mt-2 text-xs">
+                🚀 <strong>Created by Pankaj Kumar</strong> | Digital Innovation for Rural Empowerment
+            </p>
+            <p class="mt-1 text-xs text-slate-600">Built with ❤️ for community development</p>
+        </div>
+    </div>
+</footer>
+
+<script src="app-enhanced.js"></script>
+</body>
+</html>
