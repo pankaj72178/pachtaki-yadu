@@ -300,6 +300,27 @@
     </div>
 </footer>
 
-<script src="app-enhanced.js"></script>
+<!-- Update Modal -->
+<div id="updateModal" class="hidden fixed inset-0 bg-black/50 z-40 flex items-center justify-center" style="display: none;">
+    <div class="bg-slate-800 rounded-lg p-6 max-w-md w-full mx-4 border border-white/10">
+        <h3 class="text-xl font-bold text-white mb-4">Update Complaint Status</h3>
+        <input type="hidden" id="updateId">
+        <div class="space-y-4">
+            <select id="updateStatus" class="w-full bg-slate-900 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500">
+                <option value="">Select Status</option>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+            </select>
+            <textarea id="updateNote" placeholder="Add notes..." rows="3" class="w-full bg-slate-900 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500"></textarea>
+            <div class="flex gap-3">
+                <button onclick="saveStatusUpdate()" class="flex-1 bg-purple-600 text-white font-bold py-2 rounded-lg hover:bg-purple-700 transition">Save</button>
+                <button onclick="closeUpdateModal()" class="flex-1 bg-slate-700 text-white font-bold py-2 rounded-lg hover:bg-slate-600 transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="app-safe.js"></script>
 </body>
 </html>
