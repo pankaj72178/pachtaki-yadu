@@ -138,8 +138,11 @@ const safeToggleClass = (id, classes, action = 'toggle') => {
 // ========================================
 // API CONFIGURATION
 // ========================================
-const API_URL = `${window.location.protocol}//${window.location.hostname}:3000/api`;
-const N8N_WEBHOOK = 'https://pankajkumar8454.app.n8n.cloud/form/42948991-f834-4c85-abe2-9863055e4ea5';
+// Use dynamic config loaded from config.js
+// Falls back to hardcoded values if config not available
+
+const API_URL = window.CONFIG ? window.CONFIG.getAPIUrl() : `${window.location.protocol}//${window.location.hostname}:3000/api`;
+const N8N_WEBHOOK = window.CONFIG ? window.CONFIG.getWebhookUrl('n8n') : 'https://pankajkumar8454.app.n8n.cloud/form/42948991-f834-4c85-abe2-9863055e4ea5';
 
 // Global state
 let allComplaints = [];
@@ -338,6 +341,12 @@ function setupFormHandlers() {
 
 async function submitComplaint() {
   try {
+    // Must be signed in (complaints are tied to the citizen's account).
+    if (window.AUTH && !window.AUTH.isAuthenticated()) {
+      showMessage('Please sign in with Google (top-right) to file a complaint.', 'error');
+      return;
+    }
+
     const fullName = safeGetValue('fullName');
     const wardNumber = safeGetValue('wardNumber');
     const category = safeGetValue('category');
@@ -362,48 +371,40 @@ async function submitComplaint() {
       category,
       severity,
       issue,
-      photo: photoData || null,
+      photoUrl: photoData || null,
       createdAt: new Date().toISOString(),
       status: 'Pending'
     };
 
     try {
-      // Try API first
-      const response = await fetch(`${API_URL}/complaints`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      // Try API first with HTTP client (includes retries and error handling)
+      await HTTP.post(
+        `${API_URL}/complaints`,
+        payload,
+        'submitBtn'
+      );
 
-      if (response.ok) {
-        showMessage('✓ Report submitted successfully!', 'success');
-        resetComplaintForm();
-        loadComplaints();
-        loadStatistics();
-        loadAdminTable();
-      } else {
-        throw new Error('API response not ok');
-      }
+      showMessage('✓ Report submitted successfully!', 'success');
+      resetComplaintForm();
+      loadComplaints();
+      loadStatistics();
+      loadAdminTable();
     } catch (apiError) {
-      console.warn('⚠️ API failed, trying N8N webhook...');
+      console.warn('⚠️ API failed, trying N8N webhook...', apiError.message);
       
       try {
-        // Fallback to N8N
-        const n8nResponse = await fetch(N8N_WEBHOOK, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
+        // Fallback to N8N with HTTP client
+        await HTTP.post(
+          N8N_WEBHOOK,
+          payload,
+          'submitBtn'
+        );
 
-        if (n8nResponse.ok) {
-          showMessage('✓ Report submitted via webhook!', 'success');
-          resetComplaintForm();
-          loadComplaints();
-        } else {
-          throw new Error('N8N webhook failed');
-        }
+        showMessage('✓ Report submitted via webhook!', 'success');
+        resetComplaintForm();
+        loadComplaints();
       } catch (webhookError) {
-        console.error('❌ Both API and webhook failed:', webhookError);
+        console.error('❌ Both API and webhook failed:', webhookError.message);
         // Save to localStorage as final fallback
         saveToLocalStorage(payload);
         showMessage('✓ Report saved locally. Will sync when online.', 'warning');
@@ -452,20 +453,19 @@ async function loadComplaints() {
     if (!container) return;
 
     try {
-      const response = await fetch(`${API_URL}/complaints`);
-      if (response.ok) {
-        allComplaints = await response.json();
-      } else {
-        allComplaints = JSON.parse(localStorage.getItem('complaints') || '[]');
-      }
+      // PUBLIC feed — anyone can see every complaint (anonymized, no names).
+      // No login required to view.
+      allComplaints = await HTTP.get(`${API_URL}/complaints/public`, 'complaintsContainer');
     } catch (error) {
-      console.warn('⚠️ Loading from localStorage');
+      console.warn('⚠️ API failed, loading from localStorage:', error.message);
       allComplaints = JSON.parse(localStorage.getItem('complaints') || '[]');
+      showNotification('Using cached data (API unavailable)', 'warning');
     }
 
     displayComplaints(allComplaints);
   } catch (error) {
     console.error('❌ Load complaints error:', error);
+    showNotification('Error loading complaints', 'error');
   }
 }
 
@@ -513,8 +513,8 @@ function displayComplaints(complaints) {
               <span class="text-lg">${categoryIcon}</span>
               <span class="px-2 py-1 bg-slate-700/50 text-slate-300 text-[10px] font-bold rounded">${escapeHtml(complaint.category)}</span>
             </div>
-            <h3 class="text-white font-bold text-lg mb-1">${escapeHtml(complaint.fullName)}</h3>
-            <p class="text-slate-400 text-sm"><i class="fa-solid fa-map-pin text-purple-500 mr-2"></i>${escapeHtml(complaint.wardNumber)}</p>
+            <h3 class="text-white font-bold text-lg mb-1">${escapeHtml(complaint.category || 'Complaint')}</h3>
+            <p class="text-slate-400 text-sm"><i class="fa-solid fa-map-pin text-purple-500 mr-2"></i>${escapeHtml(complaint.wardNumber || '')}</p>
           </div>
           <div class="flex flex-col gap-2">
             <span class="px-3 py-1 bg-${statusColor}-500/10 text-${statusColor}-400 text-[10px] font-black uppercase rounded-full border border-${statusColor}-500/20 whitespace-nowrap text-center">
@@ -528,7 +528,7 @@ function displayComplaints(complaints) {
         
         <p class="text-slate-300 text-sm mb-4 leading-relaxed">${escapeHtml(complaint.issue)}</p>
         
-        ${complaint.photo ? `<img src="${complaint.photo}" alt="Issue photo" class="w-full rounded-lg mb-4 max-h-48 object-cover border border-white/10">` : ''}
+        ${complaint.photoUrl ? `<img src="${complaint.photoUrl}" alt="Issue photo" class="w-full rounded-lg mb-4 max-h-48 object-cover border border-white/10">` : ''}
         
         <div class="flex items-center justify-between pt-4 border-t border-white/5">
           <p class="text-[10px] text-slate-500"><i class="fa-solid fa-calendar mr-1"></i>${createdDate}</p>
@@ -696,24 +696,20 @@ async function saveStatusUpdate() {
       return;
     }
 
-    const response = await fetch(`${API_URL}/complaints/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus, note }),
-    });
+    const response = await HTTP.put(
+      `${API_URL}/complaints/${id}`,
+      { status: newStatus, note },
+      'updateModal'
+    );
 
-    if (response.ok) {
-      showNotification('✓ Status updated successfully!', 'success');
-      closeUpdateModal();
-      loadComplaints();
-      loadAdminTable();
-      loadStatistics();
-    } else {
-      showNotification('Failed to update status', 'error');
-    }
+    showNotification('✓ Status updated successfully!', 'success');
+    closeUpdateModal();
+    loadComplaints();
+    loadAdminTable();
+    loadStatistics();
   } catch (error) {
     console.error('❌ Save status update error:', error);
-    showNotification('Error updating status', 'error');
+    showNotification('Error updating status: ' + error.message, 'error');
   }
 }
 

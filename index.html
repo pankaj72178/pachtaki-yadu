@@ -6,6 +6,12 @@
     <title>Pachtaki Yadu - Digital Village Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Identity Services (renders the Sign in with Google button) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        // Public Google OAuth client id (safe to expose in the browser).
+        window.GOOGLE_CLIENT_ID = "14480656276-vrcqn2qoprnqfi7mfrbpqssg1p5c1h75.apps.googleusercontent.com";
+    </script>
     <style>
         :root { --gp-accent: #a855f7; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); }
@@ -34,6 +40,8 @@
             <a href="#about-village" class="hover:text-purple-500 transition">ABOUT VILLAGE</a>
             <a href="#about-me" class="hover:text-purple-500 transition">ABOUT AUTHOR</a>
         </div>
+        <!-- Auth bar: Google sign-in button (logged out) or user + logout (logged in) -->
+        <div id="authBar" class="flex items-center"></div>
     </div>
 </nav>
 
@@ -152,10 +160,18 @@
 <!-- COMPLAINTS -->
 <section id="complaints" class="py-16 px-4 md:px-6">
     <div class="container mx-auto">
-        <h2 class="text-3xl md:text-4xl font-black text-white mb-8">📝 Register Complaint</h2>
+        <h2 class="text-3xl md:text-4xl font-black text-white mb-2">👤 Citizen Section — Register a Complaint</h2>
+        <p class="text-slate-400 mb-8">Sign in with Google to file a complaint. You'll get a confirmation email once it's submitted.</p>
         
+        <!-- Shown when not logged in; hidden by auth.js once signed in. -->
+        <div id="loginNotice" class="max-w-2xl mx-auto mb-4 hidden">
+            <div class="glass rounded-xl p-4 border border-yellow-500/30 text-center text-yellow-300 text-sm">
+                <i class="fa-solid fa-lock mr-1"></i> Please sign in with Google (top-right) to file a complaint.
+            </div>
+        </div>
+
         <div class="max-w-2xl mx-auto glass rounded-xl p-6 md:p-8 border border-white/10 mb-12">
-            <form id="complaintForm" onsubmit="submitComplaint(event)" class="space-y-4">
+            <form id="complaintForm" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input type="text" id="fullName" placeholder="Full Name" class="bg-slate-950 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500" required>
                     <select id="wardNumber" class="bg-slate-950 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500" required>
@@ -188,7 +204,8 @@
             </form>
         </div>
 
-        <h3 class="text-2xl font-bold text-white mb-6">Recent Complaints</h3>
+        <h3 class="text-2xl font-bold text-white mb-1">🗣️ Community Complaints</h3>
+        <p class="text-slate-400 text-sm mb-6">Public — visible to everyone. The identity of who filed each complaint stays private.</p>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="complaintsContainer">
             <div class="glass rounded-xl p-6 border border-white/10 text-center text-slate-400">Loading...</div>
         </div>
@@ -321,6 +338,19 @@
     </div>
 </div>
 
+<!-- Configuration (must load first) -->
+<script src="config.js"></script>
+
+<!-- HTTP Client (required by app) -->
+<script src="http-client.js"></script>
+
+<!-- Image Upload Manager -->
+<script src="image-upload.js"></script>
+
+<!-- Auth: Google login, token, role gating (before the app) -->
+<script src="auth.js"></script>
+
+<!-- Application (uses config & HTTP client) -->
 <script src="app-safe.js"></script>
 </body>
 </html>
