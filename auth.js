@@ -451,6 +451,8 @@ const AUTH = (() => {
     // Refresh the citizen's own complaints list if app-safe.js is loaded.
     if (window.loadComplaints) window.loadComplaints();
     if (window.loadStatistics) window.loadStatistics();
+    // Re-render info sections so admin add/edit/delete controls toggle.
+    if (window.CONTENT) window.CONTENT.refresh();
   }
 
   function escapeHtml(str) {

@@ -15,6 +15,7 @@ const os = require("os");
 const { connectDB } = require("./server/db");
 const authRoutes = require("./server/routes/auth");
 const complaintRoutes = require("./server/routes/complaints");
+const contentRoutes = require("./server/routes/content");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -49,6 +50,7 @@ app.get("/api/health", (req, res) => {
 // API routes.
 app.use("/api/auth", authRoutes);
 app.use("/api/complaints", complaintRoutes);
+app.use("/api/content", contentRoutes);
 
 // JSON 404 for unknown API routes.
 app.use("/api", (req, res) => {
