@@ -66,7 +66,21 @@
     <div class="container mx-auto">
         <h2 class="text-3xl md:text-4xl font-black text-white mb-8">📢 Public Notices</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="noticesContainer">
-            <div class="glass rounded-xl p-6 border border-white/10 text-center text-slate-400"><i id="loadingSpinner" class="fa-solid fa-spinner text-2xl"></i></div>
+            <div class="glass rounded-xl p-6 border border-purple-500/30">
+                <div class="flex items-center gap-2 mb-3"><i class="fa-solid fa-bullhorn text-purple-400"></i><span class="px-2 py-0.5 bg-purple-500/20 text-purple-300 text-[10px] font-bold rounded">IMPORTANT</span></div>
+                <h3 class="text-white font-bold mb-2">How to file a complaint</h3>
+                <p class="text-slate-400 text-sm">Click <strong>Sign In / Sign Up</strong> (top-right), create your account, then fill the complaint form below. You'll get an email confirmation and can track the status (Pending → Ongoing → Completed).</p>
+            </div>
+            <div class="glass rounded-xl p-6 border border-white/10">
+                <div class="flex items-center gap-2 mb-3"><i class="fa-solid fa-clock text-emerald-400"></i><span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] font-bold rounded">OFFICE HOURS</span></div>
+                <h3 class="text-white font-bold mb-2">Gram Panchayat Office</h3>
+                <p class="text-slate-400 text-sm">Open <strong>Mon–Sat, 10:00 AM – 5:00 PM</strong> (closed on public holidays). Visit the office for in-person grievances, certificates, and scheme enrollment.</p>
+            </div>
+            <div class="glass rounded-xl p-6 border border-white/10">
+                <div class="flex items-center gap-2 mb-3"><i class="fa-solid fa-phone text-blue-400"></i><span class="px-2 py-0.5 bg-blue-500/20 text-blue-300 text-[10px] font-bold rounded">HELPLINE</span></div>
+                <h3 class="text-white font-bold mb-2">Emergency & Support</h3>
+                <p class="text-slate-400 text-sm">For urgent water, electricity or sanitation issues, file a complaint marked <strong>High/Critical</strong> severity. Community complaints are public so everyone can see what's being worked on.</p>
+            </div>
         </div>
     </div>
 </section>
@@ -177,10 +191,17 @@
                     <select id="wardNumber" class="bg-slate-950 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500" required>
                         <option value="">Select Ward</option>
                         <option value="Ward 1">Ward 1</option>
-                        <option value="Ward 2">Ward 7</option>
-                        <option value="Ward 3">Ward 8</option>
-                        <option value="Ward 4">Ward 9</option>
-                        <option value="Ward 5">Ward 11</option>
+                        <option value="Ward 2">Ward 2</option>
+                        <option value="Ward 3">Ward 3</option>
+                        <option value="Ward 4">Ward 4</option>
+                        <option value="Ward 5">Ward 5</option>
+                        <option value="Ward 6">Ward 6</option>
+                        <option value="Ward 7">Ward 7</option>
+                        <option value="Ward 8">Ward 8</option>
+                        <option value="Ward 9">Ward 9</option>
+                        <option value="Ward 10">Ward 10</option>
+                        <option value="Ward 11">Ward 11</option>
+                        <option value="Ward 12">Ward 12</option>
                     </select>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -326,8 +347,8 @@
             <select id="updateStatus" class="w-full bg-slate-900 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500">
                 <option value="">Select Status</option>
                 <option value="Pending">Pending</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
+                <option value="Ongoing">Ongoing</option>
+                <option value="Completed">Completed</option>
             </select>
             <textarea id="updateNote" placeholder="Add notes..." rows="3" class="w-full bg-slate-900 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-purple-500"></textarea>
             <div class="flex gap-3">

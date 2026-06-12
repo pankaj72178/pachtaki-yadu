@@ -72,6 +72,7 @@ const AUTH = (() => {
 
       setSession(data.token, data.user);
       onAuthChange();
+      closeModal(); // close the login modal after a successful Google sign-in
       if (window.showNotification) {
         window.showNotification(`Welcome, ${data.user.name}!`, "success");
       }

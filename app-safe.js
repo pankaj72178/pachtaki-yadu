@@ -377,39 +377,21 @@ async function submitComplaint() {
     };
 
     try {
-      // Try API first with HTTP client (includes retries and error handling)
-      await HTTP.post(
-        `${API_URL}/complaints`,
-        payload,
-        'submitBtn'
-      );
+      // Submit to the real backend (saves to MongoDB, emails confirmation).
+      await HTTP.post(`${API_URL}/complaints`, payload, 'submitBtn');
 
-      showMessage('✓ Report submitted successfully!', 'success');
+      showMessage('✓ Complaint submitted! A confirmation email is on its way.', 'success');
       resetComplaintForm();
       loadComplaints();
       loadStatistics();
-      loadAdminTable();
     } catch (apiError) {
-      console.warn('⚠️ API failed, trying N8N webhook...', apiError.message);
-      
-      try {
-        // Fallback to N8N with HTTP client
-        await HTTP.post(
-          N8N_WEBHOOK,
-          payload,
-          'submitBtn'
-        );
-
-        showMessage('✓ Report submitted via webhook!', 'success');
-        resetComplaintForm();
-        loadComplaints();
-      } catch (webhookError) {
-        console.error('❌ Both API and webhook failed:', webhookError.message);
-        // Save to localStorage as final fallback
-        saveToLocalStorage(payload);
-        showMessage('✓ Report saved locally. Will sync when online.', 'warning');
-        resetComplaintForm();
+      console.error('❌ Submit failed:', apiError.message);
+      // Show the real reason — no fake "saved locally"/webhook success.
+      let msg = apiError.message || 'Could not submit. Please try again.';
+      if (apiError.status === 401 || /log in|authentication/i.test(msg)) {
+        msg = 'Your session expired. Please sign in again and resubmit.';
       }
+      showMessage(msg, 'error');
     }
   } catch (error) {
     console.error('❌ Submit complaint error:', error);
@@ -584,8 +566,9 @@ function loadStatistics() {
 
     const total = allComplaints.length;
     const pending = allComplaints.filter((c) => c.status === 'Pending').length;
-    const resolved = allComplaints.filter((c) => c.status === 'Resolved').length;
-    const rate = Math.round((resolved / total) * 100);
+    // "Completed" is the resolved state in the new status set.
+    const resolved = allComplaints.filter((c) => c.status === 'Completed').length;
+    const rate = total ? Math.round((resolved / total) * 100) : 0;
 
     safeSetText('statTotal', String(total));
     safeSetText('statPending', String(pending));
@@ -644,7 +627,8 @@ function loadAdminTable() {
           </td>
           <td class="px-4 py-3">
             <span class="text-xs px-2 py-1 rounded ${
-              complaint.status === 'Resolved' ? 'bg-green-500/20 text-green-400' 
+              complaint.status === 'Completed' ? 'bg-green-500/20 text-green-400'
+              : complaint.status === 'Ongoing' ? 'bg-blue-500/20 text-blue-400'
               : 'bg-yellow-500/20 text-yellow-400'
             }">
               ${complaint.status || 'Pending'}
