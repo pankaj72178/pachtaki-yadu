@@ -3,7 +3,14 @@ const mongoose = require("mongoose");
 // Generic content item for the village portal's info sections. One model
 // powers Government Services, Village Events, Agriculture Support, Job
 // Opportunities, and Budget & Expenditure — distinguished by `section`.
-const SECTIONS = ["services", "events", "agriculture", "jobs", "budget"];
+const SECTIONS = [
+  "notices",
+  "services",
+  "events",
+  "agriculture",
+  "jobs",
+  "budget",
+];
 
 const contentSchema = new mongoose.Schema(
   {

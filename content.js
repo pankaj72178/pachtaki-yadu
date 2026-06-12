@@ -10,6 +10,7 @@ const CONTENT = (() => {
 
   // Each managed section: key (server), container id, friendly noun, meta hint.
   const SECTIONS = [
+    { key: "notices", container: "noticesContainer", noun: "Notice", hint: "e.g. IMPORTANT / 15 Aug" },
     { key: "services", container: "servicesContainer", noun: "Service", hint: "e.g. Mon–Sat, 10–5" },
     { key: "events", container: "eventsContainer", noun: "Event", hint: "e.g. 15 Aug 2026" },
     { key: "agriculture", container: "agricultureContainer", noun: "Scheme", hint: "e.g. Eligibility / subsidy" },
