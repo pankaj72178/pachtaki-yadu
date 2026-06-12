@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-// Citizens and admins. Login is via Google only (no passwords). `role` is
+// Citizens and admins. Login is via Google OR email/password. `role` is
 // "admin" for emails listed in ADMIN_EMAILS, otherwise "citizen".
 const userSchema = new mongoose.Schema(
   {
@@ -13,6 +13,8 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
     googleId: { type: String },
+    // Only set for email/password accounts (Google users have none).
+    passwordHash: { type: String },
     role: { type: String, enum: ["citizen", "admin"], default: "citizen" },
   },
   {
@@ -22,6 +24,7 @@ const userSchema = new mongoose.Schema(
       transform: (doc, ret) => {
         ret.id = ret._id;
         delete ret._id;
+        delete ret.passwordHash; // never expose the hash
       },
     },
   }

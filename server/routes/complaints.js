@@ -87,12 +87,22 @@ router.get("/", adminOnly, async (req, res) => {
   }
 });
 
-// PUT /api/complaints/:id — ADMIN ONLY: change status / add a note.
+// PUT /api/complaints/:id — ADMIN ONLY: change ANYTHING about a complaint
+// (status, category, ward, severity, issue) and/or add a note.
+const STATUSES = ["Pending", "Ongoing", "Completed"];
+
 router.put("/:id", adminOnly, async (req, res) => {
   try {
-    const { status, note } = req.body || {};
+    const { status, category, wardNumber, severity, issue, note } =
+      req.body || {};
+
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(404).json({ error: "Complaint not found" });
+    }
+    if (status && !STATUSES.includes(status)) {
+      return res
+        .status(400)
+        .json({ error: "Status must be Pending, Ongoing, or Completed" });
     }
 
     const complaint = await Complaint.findById(req.params.id);
@@ -100,14 +110,36 @@ router.put("/:id", adminOnly, async (req, res) => {
       return res.status(404).json({ error: "Complaint not found" });
     }
 
+    // Apply only the fields that were provided.
     if (status) complaint.status = status;
+    if (category) complaint.category = category;
+    if (wardNumber) complaint.wardNumber = wardNumber;
+    if (severity) complaint.severity = severity;
+    if (issue) complaint.issue = issue;
     if (note) complaint.notes.push({ text: note });
-    await complaint.save();
 
+    await complaint.save();
     res.json({ success: true, complaint });
   } catch (err) {
     console.error("Update complaint error:", err);
     res.status(500).json({ error: "Failed to update complaint" });
+  }
+});
+
+// DELETE /api/complaints/:id — ADMIN ONLY: permanently remove a complaint.
+router.delete("/:id", adminOnly, async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ error: "Complaint not found" });
+    }
+    const deleted = await Complaint.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Complaint not found" });
+    }
+    res.json({ success: true, message: "Complaint deleted" });
+  } catch (err) {
+    console.error("Delete complaint error:", err);
+    res.status(500).json({ error: "Failed to delete complaint" });
   }
 });
 

@@ -484,8 +484,8 @@ function displayComplaints(complaints) {
   }
 
   container.innerHTML = complaints.map((complaint) => {
-    const statusColor = complaint.status === 'Pending' ? 'yellow' 
-      : complaint.status === 'In Progress' ? 'blue' 
+    const statusColor = complaint.status === 'Pending' ? 'yellow'
+      : complaint.status === 'Ongoing' ? 'blue'
       : 'emerald';
     const severityColor = complaint.severity === 'High' ? 'red' 
       : complaint.severity === 'Medium' ? 'amber' 

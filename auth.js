@@ -83,6 +83,150 @@ const AUTH = (() => {
     }
   }
 
+  // --- Email / password sign in + sign up ----------------------------
+  async function postAuth(path, body) {
+    const res = await fetch(`${API_URL}/auth/${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Request failed");
+    return data;
+  }
+
+  async function handleLogin(email, password) {
+    const data = await postAuth("login", { email, password });
+    setSession(data.token, data.user);
+    onAuthChange();
+    closeModal();
+    if (window.showNotification)
+      window.showNotification(`Welcome back, ${data.user.name}!`, "success");
+  }
+
+  async function handleRegister(name, email, password) {
+    const data = await postAuth("register", { name, email, password });
+    setSession(data.token, data.user);
+    onAuthChange();
+    closeModal();
+    if (window.showNotification)
+      window.showNotification(`Account created. Welcome, ${data.user.name}!`, "success");
+  }
+
+  // --- Auth modal (Sign In / Sign Up tabs + Google) ------------------
+  function ensureModal() {
+    let modal = document.getElementById("authModal");
+    if (modal) return modal;
+
+    modal = document.createElement("div");
+    modal.id = "authModal";
+    modal.className =
+      "fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 p-4";
+    modal.innerHTML = `
+      <div class="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-sm p-6 relative">
+        <button id="authClose" class="absolute top-3 right-4 text-slate-400 hover:text-white text-xl">&times;</button>
+        <div class="flex gap-2 mb-5">
+          <button id="tabSignin" class="flex-1 py-2 rounded-lg text-sm font-bold bg-purple-600 text-white">Sign In</button>
+          <button id="tabSignup" class="flex-1 py-2 rounded-lg text-sm font-bold bg-slate-700 text-slate-300">Sign Up</button>
+        </div>
+        <p id="authError" class="text-red-400 text-xs font-semibold mb-3 hidden"></p>
+
+        <form id="signinForm" class="space-y-3">
+          <input type="email" id="siEmail" placeholder="Email" required class="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-white text-sm focus:outline-none focus:border-purple-500">
+          <input type="password" id="siPass" placeholder="Password" required class="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-white text-sm focus:outline-none focus:border-purple-500">
+          <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-lg text-sm">Sign In</button>
+        </form>
+
+        <form id="signupForm" class="space-y-3 hidden">
+          <input type="text" id="suName" placeholder="Full Name" required class="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-white text-sm focus:outline-none focus:border-purple-500">
+          <input type="email" id="suEmail" placeholder="Email" required class="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-white text-sm focus:outline-none focus:border-purple-500">
+          <input type="password" id="suPass" placeholder="Password (min 6 chars)" required class="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-white text-sm focus:outline-none focus:border-purple-500">
+          <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-lg text-sm">Create Account</button>
+          <p class="text-[11px] text-slate-500">Admins are granted automatically for approved emails.</p>
+        </form>
+
+        <div class="flex items-center gap-3 my-4">
+          <div class="flex-1 h-px bg-white/10"></div><span class="text-[11px] text-slate-500">or</span><div class="flex-1 h-px bg-white/10"></div>
+        </div>
+        <div id="modalGsi" class="flex justify-center"></div>
+      </div>`;
+    document.body.appendChild(modal);
+
+    const err = modal.querySelector("#authError");
+    const showErr = (m) => {
+      err.textContent = m;
+      err.classList.remove("hidden");
+    };
+    const clearErr = () => err.classList.add("hidden");
+
+    modal.querySelector("#authClose").addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    const siForm = modal.querySelector("#signinForm");
+    const suForm = modal.querySelector("#signupForm");
+    const tabIn = modal.querySelector("#tabSignin");
+    const tabUp = modal.querySelector("#tabSignup");
+
+    function selectTab(which) {
+      clearErr();
+      const inActive = which === "in";
+      siForm.classList.toggle("hidden", !inActive);
+      suForm.classList.toggle("hidden", inActive);
+      tabIn.className = `flex-1 py-2 rounded-lg text-sm font-bold ${
+        inActive ? "bg-purple-600 text-white" : "bg-slate-700 text-slate-300"
+      }`;
+      tabUp.className = `flex-1 py-2 rounded-lg text-sm font-bold ${
+        !inActive ? "bg-purple-600 text-white" : "bg-slate-700 text-slate-300"
+      }`;
+    }
+    tabIn.addEventListener("click", () => selectTab("in"));
+    tabUp.addEventListener("click", () => selectTab("up"));
+
+    siForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearErr();
+      try {
+        await handleLogin(
+          modal.querySelector("#siEmail").value.trim(),
+          modal.querySelector("#siPass").value
+        );
+      } catch (er) {
+        showErr(er.message);
+      }
+    });
+    suForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearErr();
+      try {
+        await handleRegister(
+          modal.querySelector("#suName").value.trim(),
+          modal.querySelector("#suEmail").value.trim(),
+          modal.querySelector("#suPass").value
+        );
+      } catch (er) {
+        showErr(er.message);
+      }
+    });
+
+    return modal;
+  }
+
+  function openModal() {
+    const modal = ensureModal();
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    renderGoogleButton(modal.querySelector("#modalGsi"));
+  }
+  function closeModal() {
+    const modal = document.getElementById("authModal");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+  }
+
   // Poll until the GIS script is ready, then render the button into `el`.
   function renderGoogleButton(el) {
     if (!CLIENT_ID) {
@@ -143,8 +287,10 @@ const AUTH = (() => {
       const btn = document.getElementById("logoutBtn");
       if (btn) btn.addEventListener("click", logout);
     } else {
-      bar.innerHTML = '<div id="gsiButton"></div>';
-      renderGoogleButton(document.getElementById("gsiButton"));
+      bar.innerHTML =
+        '<button id="openAuth" class="text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white px-4 py-1.5 rounded-full transition"><i class="fa-solid fa-right-to-bracket mr-1"></i>Sign In / Sign Up</button>';
+      const btn = document.getElementById("openAuth");
+      if (btn) btn.addEventListener("click", openModal);
     }
   }
 
@@ -215,6 +361,15 @@ const AUTH = (() => {
           '<tr><td class="p-4 text-slate-500" colspan="7">No complaints yet.</td></tr>';
         return;
       }
+      const SEV = ["Low", "Medium", "High", "Critical"];
+      const STA = ["Pending", "Ongoing", "Completed"];
+      const dropdown = (arr, cur, cls, id) =>
+        `<select data-id="${id}" class="${cls} bg-slate-950 border border-white/10 rounded p-1 text-white text-xs">` +
+        arr
+          .map((s) => `<option ${s === cur ? "selected" : ""}>${s}</option>`)
+          .join("") +
+        `</select>`;
+
       body.innerHTML = list
         .map((c) => {
           const who = c.user
@@ -222,40 +377,61 @@ const AUTH = (() => {
                 c.user.email || ""
               )}</span>`
             : escapeHtml(c.fullName || "");
-          const opts = ["Pending", "In Review", "Resolved"]
-            .map(
-              (s) =>
-                `<option ${s === c.status ? "selected" : ""}>${s}</option>`
-            )
-            .join("");
+          // Every field is an editable input/select so admins can change anything.
           return `<tr class="border-b border-white/5 align-top">
-            <td class="p-3 text-slate-200">${who}</td>
-            <td class="p-3 text-slate-300">${escapeHtml(c.wardNumber || "")}</td>
-            <td class="p-3 text-slate-300">${escapeHtml(c.category || "")}</td>
-            <td class="p-3 text-slate-400 max-w-xs">${escapeHtml(c.issue || "")}</td>
-            <td class="p-3 text-slate-300">${escapeHtml(c.severity || "")}</td>
-            <td class="p-3"><select data-id="${c.id}" class="admin-status bg-slate-950 border border-white/10 rounded p-1 text-white text-xs">${opts}</select></td>
-            <td class="p-3"><button data-id="${c.id}" class="admin-save bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3 py-1 rounded">Save</button></td>
+            <td class="p-2 text-slate-200">${who}</td>
+            <td class="p-2"><input data-id="${c.id}" class="a-ward bg-slate-950 border border-white/10 rounded p-1 text-white text-xs w-20" value="${escapeHtml(c.wardNumber || "")}"></td>
+            <td class="p-2"><input data-id="${c.id}" class="a-cat bg-slate-950 border border-white/10 rounded p-1 text-white text-xs w-28" value="${escapeHtml(c.category || "")}"></td>
+            <td class="p-2"><input data-id="${c.id}" class="a-issue bg-slate-950 border border-white/10 rounded p-1 text-white text-xs w-48" value="${escapeHtml(c.issue || "")}"></td>
+            <td class="p-2">${dropdown(SEV, c.severity, "a-sev", c.id)}</td>
+            <td class="p-2">${dropdown(STA, c.status, "a-status", c.id)}</td>
+            <td class="p-2 whitespace-nowrap">
+              <button data-id="${c.id}" class="a-save bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-2 py-1 rounded">Save</button>
+              <button data-id="${c.id}" class="a-del bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-2 py-1 rounded ml-1">Delete</button>
+            </td>
           </tr>`;
         })
         .join("");
 
-      body.querySelectorAll(".admin-save").forEach((btn) => {
+      const val = (cls, id) =>
+        body.querySelector(`.${cls}[data-id="${id}"]`).value;
+
+      // Save = update ALL fields of that complaint.
+      body.querySelectorAll(".a-save").forEach((btn) => {
         btn.addEventListener("click", async () => {
           const id = btn.dataset.id;
-          const sel = body.querySelector(`.admin-status[data-id="${id}"]`);
           try {
             await window.HTTP.put(`${API_URL}/complaints/${id}`, {
-              status: sel.value,
+              wardNumber: val("a-ward", id),
+              category: val("a-cat", id),
+              issue: val("a-issue", id),
+              severity: val("a-sev", id),
+              status: val("a-status", id),
             });
             if (window.showNotification)
-              window.showNotification("Status updated", "success");
+              window.showNotification("Complaint updated", "success");
+            if (window.loadComplaints) window.loadComplaints(); // refresh public feed
           } catch (err) {
             if (window.showNotification)
-              window.showNotification(
-                err.message || "Update failed",
-                "error"
-              );
+              window.showNotification(err.message || "Update failed", "error");
+          }
+        });
+      });
+
+      // Delete = remove the complaint permanently (with confirmation).
+      body.querySelectorAll(".a-del").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          if (!window.confirm("Delete this complaint permanently?")) return;
+          const id = btn.dataset.id;
+          try {
+            await window.HTTP.delete(`${API_URL}/complaints/${id}`);
+            if (window.showNotification)
+              window.showNotification("Complaint deleted", "success");
+            loadAdminDashboard(); // refresh the table
+            if (window.loadComplaints) window.loadComplaints();
+          } catch (err) {
+            if (window.showNotification)
+              window.showNotification(err.message || "Delete failed", "error");
           }
         });
       });
