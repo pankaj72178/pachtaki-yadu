@@ -12,69 +12,165 @@
         // Public Google OAuth client id (safe to expose in the browser).
         window.GOOGLE_CLIENT_ID = "14480656276-vrcqn2qoprnqfi7mfrbpqssg1p5c1h75.apps.googleusercontent.com";
     </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        :root { --gp-accent: #a855f7; }
+        /* ============================================================
+           PACHTAKI YADU — Premium futuristic SaaS design system
+           (glassmorphism · aurora · bloom · spring motion)
+           ============================================================ */
+        :root {
+            /* palette */
+            --bg-0: #060611;
+            --accent: #a855f7;          /* purple */
+            --accent-2: #6366f1;        /* indigo  */
+            --accent-3: #22d3ee;        /* cyan    */
+            --gp-accent: #a855f7;       /* legacy alias */
+            --text: #eceefb;
+            --text-dim: #a6abce;
+            /* glass */
+            --glass-bg: rgba(255, 255, 255, 0.045);
+            --glass-bg-strong: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.10);
+            --glass-blur: 26px;
+            /* shape + motion */
+            --radius: 28px;
+            --radius-sm: 18px;
+            --spring: cubic-bezier(.16, 1, .3, 1);
+            --shadow-deep: 0 30px 70px rgba(0, 0, 0, 0.55);
+            --glow: 0 0 60px rgba(168, 85, 247, 0.35);
+        }
 
-        /* ---------- Animated aurora background ---------- */
+        * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        html { scroll-behavior: smooth; }
+
+        /* ---------- Dark aurora base ---------- */
         body {
-            background: linear-gradient(-45deg, #0b1022, #1e1b4b, #2a1f6b, #0f172a);
-            background-size: 400% 400%;
-            animation: aurora 24s ease infinite;
+            background:
+                radial-gradient(1200px 820px at 18% 8%,  #241356 0%, transparent 58%),
+                radial-gradient(1100px 760px at 84% 92%, #07314f 0%, transparent 55%),
+                radial-gradient(900px 700px at 60% 50%,  #1a0e3d 0%, transparent 60%),
+                var(--bg-0);
+            color: var(--text);
+            min-height: 100vh;
             overflow-x: hidden;
+            letter-spacing: -0.011em;
+            -webkit-font-smoothing: antialiased;
         }
-        @keyframes aurora {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        /* Floating glow blobs for depth */
-        body::before, body::after {
-            content: ""; position: fixed; width: 42vw; height: 42vw; border-radius: 50%;
-            filter: blur(100px); opacity: 0.38; z-index: 0; pointer-events: none;
-        }
-        body::before { background: radial-gradient(circle, #7c3aed, transparent 70%); top: -12vw; left: -8vw; animation: float1 18s ease-in-out infinite; }
-        body::after  { background: radial-gradient(circle, #2563eb, transparent 70%); bottom: -14vw; right: -8vw; animation: float2 21s ease-in-out infinite; }
-        @keyframes float1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(6vw,5vw) scale(1.15); } }
-        @keyframes float2 { 0%,100% { transform: translate(0,0) scale(1.1); } 50% { transform: translate(-5vw,-6vw) scale(1); } }
 
-        /* keep all content above the background blobs */
+        /* ---------- Animated light blobs (purple / blue / cyan) ---------- */
+        .aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .blob-wrap { position: absolute; inset: 0; will-change: transform; transition: transform .5s ease-out; }
+        .blob {
+            position: absolute; border-radius: 50%;
+            filter: blur(90px); opacity: 0.5; will-change: transform;
+        }
+        .blob-1 { width: 46vw; height: 46vw; background: radial-gradient(circle, #7c3aed 0%, transparent 70%); top: -12vw; left: -8vw;  animation: drift1 22s ease-in-out infinite; }
+        .blob-2 { width: 42vw; height: 42vw; background: radial-gradient(circle, #2563eb 0%, transparent 70%); bottom: -14vw; right: -8vw; animation: drift2 26s ease-in-out infinite; }
+        .blob-3 { width: 34vw; height: 34vw; background: radial-gradient(circle, #22d3ee 0%, transparent 70%); top: 38%; left: 52%; opacity: 0.38; animation: drift3 30s ease-in-out infinite; }
+        @keyframes drift1 { 0%,100% { transform: translate(0,0) scale(1); }   50% { transform: translate(6vw,5vw) scale(1.18); } }
+        @keyframes drift2 { 0%,100% { transform: translate(0,0) scale(1.12); } 50% { transform: translate(-5vw,-6vw) scale(1); } }
+        @keyframes drift3 { 0%,100% { transform: translate(0,0) scale(1); }   50% { transform: translate(-5vw,4vw) scale(1.22); } }
+
+        /* keep all content above the aurora */
         nav, header, section, footer, main, .relative { position: relative; z-index: 1; }
 
-        /* ---------- 3D frosted glass cards ---------- */
+        /* ---------- Glassmorphism cards ---------- */
         .glass {
-            background: rgba(30, 41, 59, 0.55);
-            backdrop-filter: blur(16px) saturate(160%);
-            -webkit-backdrop-filter: blur(16px) saturate(160%);
-            border: 1px solid rgba(255, 255, 255, 0.10);
-            box-shadow: 0 20px 45px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.14);
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius) !important;
+            box-shadow: var(--shadow-deep), inset 0 1px 0 rgba(255, 255, 255, 0.12);
             transform-style: preserve-3d;
-            transition: transform 0.45s cubic-bezier(.2,.8,.2,1), box-shadow 0.45s, border-color 0.3s;
-            animation: floatIn 0.6s cubic-bezier(.2,.8,.2,1) both;
+            transition: transform .5s var(--spring), box-shadow .5s var(--spring), border-color .4s, background .4s;
+            animation: rise .7s var(--spring) both;
         }
-        /* 3D tilt + lift + glow on hover (every glass card except the top bar) */
-        .glass:not(nav):not(header):hover,
-        .card-hover:hover {
-            transform: perspective(1100px) rotateX(4deg) rotateY(-4deg) translateY(-6px) scale(1.015);
-            box-shadow: 0 38px 70px rgba(124,58,237,0.35), inset 0 1px 0 rgba(255,255,255,0.22);
-            border-color: var(--gp-accent) !important;
+        /* bloom + brighten on hover (3D tilt is driven by JS for cursor-follow) */
+        .glass:not(nav):not(header):hover {
+            background: var(--glass-bg-strong);
+            box-shadow: 0 44px 96px rgba(124, 58, 237, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.22), var(--glow);
+            border-color: rgba(168, 85, 247, 0.55);
         }
-        @keyframes floatIn { from { opacity: 0; transform: translateY(24px) scale(.98); } to { opacity: 1; transform: none; } }
+        .card-hover { transition: transform .5s var(--spring), box-shadow .5s, border-color .4s; }
+        @keyframes rise { from { opacity: 0; transform: translateY(28px) scale(.97); } to { opacity: 1; transform: none; } }
 
-        /* gradient text + glowing buttons (opt-in helpers) */
-        .grad-text { background: linear-gradient(120deg,#fff 10%,#c4b5fd 55%,#818cf8 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        button, .btn { transition: transform .2s cubic-bezier(.2,.8,.2,1), box-shadow .25s, filter .2s; }
-        button:hover { filter: brightness(1.06); }
+        /* round inner Tailwind radii so nothing fights the 28px shell */
+        .glass.rounded-lg, .glass.rounded-xl, .glass.rounded-2xl { border-radius: var(--radius) !important; }
+
+        /* ---------- Typography accents ---------- */
+        h1, h2, h3 { letter-spacing: -0.025em; }
+        .grad-text, .text-gradient {
+            background: linear-gradient(120deg, #fff 8%, #c4b5fd 50%, #67e8f9 100%);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+
+        /* ---------- Buttons: magnetic + glowing ---------- */
+        button, .btn, a[class*="bg-purple"], a[class*="bg-indigo"] {
+            border-radius: 16px !important;
+            transition: transform .35s var(--spring), box-shadow .35s var(--spring), filter .25s, background .3s;
+            will-change: transform;
+        }
+        button:hover, .btn:hover { filter: brightness(1.07); }
+
+        /* primary CTAs (purple/indigo bg) get a glowing, animated gradient surface */
+        [class*="bg-purple-6"], [class*="bg-indigo-6"], [class*="bg-purple-7"], [class*="bg-indigo-7"] {
+            position: relative;
+            background-image: linear-gradient(110deg, var(--accent-2), var(--accent) 55%, #d946ef) !important;
+            box-shadow: 0 12px 34px rgba(124, 58, 237, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+            background-size: 200% 100%;
+            animation: shimmer 6s linear infinite;
+        }
+        [class*="bg-purple-6"]:hover, [class*="bg-indigo-6"]:hover,
+        [class*="bg-purple-7"]:hover, [class*="bg-indigo-7"]:hover {
+            box-shadow: 0 18px 50px rgba(168, 85, 247, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.14) inset;
+        }
+        @keyframes shimmer { to { background-position: 200% 0; } }
+
+        /* ---------- Inputs / selects: glass fields ---------- */
+        input, select, textarea {
+            background: rgba(255, 255, 255, 0.04) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 14px !important;
+            color: var(--text) !important;
+            transition: border-color .3s, box-shadow .3s, background .3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none !important;
+            border-color: rgba(168, 85, 247, 0.7) !important;
+            box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.18) !important;
+            background: rgba(255, 255, 255, 0.06) !important;
+        }
+        select option { background: #15132b; color: var(--text); }
+
+        /* ---------- Page-transition reveal ---------- */
+        @keyframes pageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+        main, body > section { animation: pageIn .6s var(--spring) both; }
+
+        /* custom scrollbar for the premium feel */
+        ::-webkit-scrollbar { width: 11px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(var(--accent-2), var(--accent)); border-radius: 99px; border: 3px solid transparent; background-clip: padding-box; }
 
         #loadingSpinner { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
+        /* respect reduced-motion preferences */
         @media (prefers-reduced-motion: reduce) {
-            *, body::before, body::after { animation: none !important; }
-            .glass:hover, .card-hover:hover { transform: none; }
+            *, .blob, .blob-wrap { animation: none !important; transition: none !important; }
+            .glass:hover { transform: none !important; }
         }
     </style>
 </head>
 <body class="text-slate-300">
+<!-- Animated aurora light blobs (parallax-driven) -->
+<div class="aurora" aria-hidden="true">
+    <div class="blob-wrap" data-depth="18"><span class="blob blob-1"></span></div>
+    <div class="blob-wrap" data-depth="34"><span class="blob blob-2"></span></div>
+    <div class="blob-wrap" data-depth="26"><span class="blob blob-3"></span></div>
+</div>
 
 <!-- NAVIGATION -->
 <nav class="fixed top-0 w-full z-50 glass border-b border-white/5">
@@ -415,5 +511,6 @@
 
 <!-- Content manager: services, events, agriculture, jobs, budget (admin CRUD) -->
 <script src="content.js"></script>
+<script src="premium-ui.js"></script>
 </body>
 </html>
