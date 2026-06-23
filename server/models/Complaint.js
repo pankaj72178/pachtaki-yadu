@@ -14,11 +14,28 @@ const complaintSchema = new mongoose.Schema(
     },
     issue: { type: String, required: true, trim: true },
     photoUrl: { type: String, default: null },
+    // Optional pinned location of the issue (from the map picker).
+    location: {
+      lat: { type: Number, default: null },
+      lng: { type: Number, default: null },
+    },
     status: {
       type: String,
       enum: ["Pending", "Ongoing", "Completed"],
       default: "Pending",
     },
+    // Ordered trail of status changes, each with a timestamp — powers the
+    // public "Pending → Ongoing → Completed" timeline.
+    statusHistory: [
+      {
+        status: {
+          type: String,
+          enum: ["Pending", "Ongoing", "Completed"],
+        },
+        at: { type: Date, default: Date.now },
+        note: { type: String, default: "" },
+      },
+    ],
     notes: [
       {
         text: String,

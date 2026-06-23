@@ -17,7 +17,9 @@ router.get("/public", async (req, res) => {
   try {
     const complaints = await Complaint.find()
       .sort({ createdAt: -1 })
-      .select("wardNumber category severity issue photoUrl status createdAt");
+      .select(
+        "wardNumber category severity issue photoUrl status location statusHistory createdAt"
+      );
     res.json(complaints);
   } catch (err) {
     console.error("Public complaints error:", err);
@@ -31,11 +33,21 @@ router.use(auth);
 // POST /api/complaints — a citizen files a complaint (tied to their account).
 router.post("/", async (req, res) => {
   try {
-    const { fullName, wardNumber, category, severity, issue, photoUrl } =
+    const { fullName, wardNumber, category, severity, issue, photoUrl, location } =
       req.body || {};
 
     if (!fullName || !wardNumber || !category || !issue) {
       return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Keep only valid numeric coordinates (ignore anything else).
+    let loc = { lat: null, lng: null };
+    if (
+      location &&
+      Number.isFinite(Number(location.lat)) &&
+      Number.isFinite(Number(location.lng))
+    ) {
+      loc = { lat: Number(location.lat), lng: Number(location.lng) };
     }
 
     const complaint = await Complaint.create({
@@ -45,6 +57,9 @@ router.post("/", async (req, res) => {
       severity: severity || "Medium",
       issue,
       photoUrl: photoUrl || null,
+      location: loc,
+      // Seed the timeline with the initial "Pending" state.
+      statusHistory: [{ status: "Pending", at: new Date() }],
       user: req.userId,
     });
 
@@ -111,7 +126,11 @@ router.put("/:id", adminOnly, async (req, res) => {
     }
 
     // Apply only the fields that were provided.
-    if (status) complaint.status = status;
+    if (status && status !== complaint.status) {
+      complaint.status = status;
+      // Record the transition in the timeline.
+      complaint.statusHistory.push({ status, at: new Date(), note: note || "" });
+    }
     if (category) complaint.category = category;
     if (wardNumber) complaint.wardNumber = wardNumber;
     if (severity) complaint.severity = severity;

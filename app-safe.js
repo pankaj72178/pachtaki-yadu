@@ -364,6 +364,12 @@ async function submitComplaint() {
       submitBtn.textContent = '⏳ SUBMITTING...';
     }
 
+    // Optional pinned location from the map picker.
+    const latRaw = safeGetValue('locLat');
+    const lngRaw = safeGetValue('locLng');
+    const location =
+      latRaw && lngRaw ? { lat: Number(latRaw), lng: Number(lngRaw) } : null;
+
     const payload = {
       id: `complaint_${Date.now()}`,
       fullName,
@@ -372,6 +378,7 @@ async function submitComplaint() {
       severity,
       issue,
       photoUrl: photoData || null,
+      location,
       createdAt: new Date().toISOString(),
       status: 'Pending'
     };
@@ -408,10 +415,13 @@ async function submitComplaint() {
 function resetComplaintForm() {
   const form = safeGetById('complaintForm');
   if (form) form.reset();
-  
+
   photoData = null;
   const photoPreview = safeGetById('photoPreview');
   if (photoPreview) photoPreview.classList.add('hidden');
+
+  // Clear the pinned map location too.
+  if (typeof window.resetPickMap === 'function') window.resetPickMap();
 }
 
 function saveToLocalStorage(complaint) {
@@ -444,12 +454,37 @@ async function loadComplaints() {
       showNotification('Using cached data (API unavailable)', 'warning');
     }
 
-    displayComplaints(allComplaints);
+    applyComplaintFilters();
   } catch (error) {
     console.error('❌ Load complaints error:', error);
     showNotification('Error loading complaints', 'error');
   }
 }
+
+// Filter the loaded complaints by search text + category/ward/status, then
+// re-render. Called on load and whenever a filter input changes.
+function applyComplaintFilters() {
+  const q = (safeGetValue('cmpSearch') || '').trim().toLowerCase();
+  const cat = safeGetValue('filterCategory') || '';
+  const ward = safeGetValue('filterWard') || '';
+  const status = safeGetValue('filterStatus') || '';
+
+  let list = Array.isArray(allComplaints) ? allComplaints.slice() : [];
+  if (cat) list = list.filter((c) => c.category === cat);
+  if (ward) list = list.filter((c) => c.wardNumber === ward);
+  if (status) list = list.filter((c) => (c.status || 'Pending') === status);
+  if (q) {
+    list = list.filter((c) =>
+      [c.issue, c.category, c.wardNumber, c.status]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+        .includes(q)
+    );
+  }
+  displayComplaints(list);
+}
+window.applyComplaintFilters = applyComplaintFilters;
 
 function displayComplaints(complaints) {
   const container = safeGetById('complaintsContainer');
@@ -487,6 +522,43 @@ function displayComplaints(complaints) {
       year: 'numeric',
     });
 
+    // --- Status timeline (Pending → Ongoing → Completed) ---
+    const stages = ['Pending', 'Ongoing', 'Completed'];
+    const history = Array.isArray(complaint.statusHistory) ? complaint.statusHistory : [];
+    const reachedAt = {};
+    history.forEach((h) => {
+      if (h && h.status && !reachedAt[h.status]) reachedAt[h.status] = h.at;
+    });
+    const curIdx = Math.max(0, stages.indexOf(complaint.status || 'Pending'));
+    const stageCol = { Pending: 'yellow', Ongoing: 'blue', Completed: 'emerald' };
+    const fmtShort = (d) =>
+      d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+
+    const timelineHtml = `
+      <div class="flex items-center gap-1 mt-4">
+        ${stages
+          .map((st, i) => {
+            const reached = reachedAt[st] != null || i <= curIdx;
+            const col = reached ? stageCol[st] : 'slate';
+            const bar = i > 0
+              ? `<div class="h-0.5 flex-1 ${reached ? `bg-${col}-500/50` : 'bg-slate-700'}"></div>`
+              : '';
+            return `<div class="flex items-center ${i > 0 ? 'flex-1' : ''}">${bar}<div class="w-3 h-3 rounded-full ${reached ? `bg-${col}-400` : 'bg-slate-600'}"></div></div>`;
+          })
+          .join('')}
+      </div>
+      <div class="flex justify-between text-[9px] text-slate-500 mt-1.5 mb-2">
+        ${stages
+          .map((st) => `<span>${st}${reachedAt[st] ? ` · ${fmtShort(reachedAt[st])}` : ''}</span>`)
+          .join('')}
+      </div>`;
+
+    const loc = complaint.location;
+    const locationHtml =
+      loc && loc.lat != null && loc.lng != null
+        ? `<a href="https://www.openstreetmap.org/?mlat=${loc.lat}&mlon=${loc.lng}#map=17/${loc.lat}/${loc.lng}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-[11px] text-purple-300 hover:text-purple-200 mb-2"><i class="fa-solid fa-location-dot"></i> View on map</a>`
+        : '';
+
     return `
       <div class="glass rounded-2xl p-6 border border-white/5 hover:border-purple-500/30 transition-all complaint-item" data-status="${(complaint.status || 'pending').toLowerCase()}">
         <div class="flex items-start justify-between mb-4">
@@ -511,7 +583,10 @@ function displayComplaints(complaints) {
         <p class="text-slate-300 text-sm mb-4 leading-relaxed">${escapeHtml(complaint.issue)}</p>
         
         ${complaint.photoUrl ? `<img src="${complaint.photoUrl}" alt="Issue photo" class="w-full rounded-lg mb-4 max-h-48 object-cover border border-white/10">` : ''}
-        
+
+        ${locationHtml}
+        ${timelineHtml}
+
         <div class="flex items-center justify-between pt-4 border-t border-white/5">
           <p class="text-[10px] text-slate-500"><i class="fa-solid fa-calendar mr-1"></i>${createdDate}</p>
           <p class="text-[10px] text-slate-600 font-mono">ID: ${complaint.id}</p>
@@ -519,6 +594,11 @@ function displayComplaints(complaints) {
       </div>
     `;
   }).join('');
+
+  // Update the community map markers to match what's shown.
+  if (typeof window.renderComplaintMap === 'function') {
+    window.renderComplaintMap(complaints);
+  }
 }
 
 function filterComplaints(status) {
